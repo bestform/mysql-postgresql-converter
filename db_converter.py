@@ -110,10 +110,15 @@ def parse(input_filename, output_filename):
                 # See if it needs type conversion
                 final_type = None
                 set_sequence = None
+                default = None
                 if type.startswith("tinyint("):
                     type = "int4"
                     set_sequence = True
                     final_type = "boolean"
+                    if extra == "NOT NULL DEFAULT \'0\'":
+                        default = 'FALSE'
+                    if extra == "NOT NULL DEFAULT \'1\'":
+                        default = 'TRUE'
                 elif type.startswith("int("):
                     type = "integer"
                     set_sequence = True
@@ -154,7 +159,15 @@ def parse(input_filename, output_filename):
                     type = enum_name
 
                 if final_type:
-                    cast_lines.append("ALTER TABLE \"%s\" ALTER COLUMN \"%s\" DROP DEFAULT, ALTER COLUMN \"%s\" TYPE %s USING CAST(\"%s\" as %s)" % (current_table, name, name, final_type, name, final_type))
+
+                    cast_lines.append(
+                        "ALTER TABLE \"%s\" ALTER COLUMN \"%s\" DROP DEFAULT, ALTER COLUMN \"%s\" TYPE %s USING CAST(\"%s\" as %s)" % (
+                        current_table, name, name, final_type, name, final_type))
+
+                    if default:
+                        cast_lines.append(
+                            "ALTER TABLE \"%s\" ALTER COLUMN \"%s\" SET DEFAULT %s" % (current_table, name, default))
+
                 # ID fields need sequences [if they are integers?]
                 if name == "id" and set_sequence is True:
                     sequence_lines.append("CREATE SEQUENCE %s_id_seq" % (current_table))
