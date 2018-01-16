@@ -115,9 +115,9 @@ def parse(input_filename, output_filename):
                     type = "int4"
                     set_sequence = True
                     final_type = "boolean"
-                    if extra == "NOT NULL DEFAULT \'0\'":
+                    if extra == "NOT NULL DEFAULT \'0\'" or extra == "DEFAULT \'0\'":
                         default = 'FALSE'
-                    if extra == "NOT NULL DEFAULT \'1\'":
+                    if extra == "NOT NULL DEFAULT \'1\'" or extra == "DEFAULT \'1\'":
                         default = 'TRUE'
                 elif type.startswith("int("):
                     type = "integer"
